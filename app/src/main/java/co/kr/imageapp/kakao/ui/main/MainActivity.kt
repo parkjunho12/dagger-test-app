@@ -58,9 +58,4 @@ class MainActivity : BaseActivity() {
             viewpagerContainer.setCurrentItem(tab.position, true)
         }.attach()
     }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-    }
 }
