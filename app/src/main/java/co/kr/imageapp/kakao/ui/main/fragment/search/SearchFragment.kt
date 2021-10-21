@@ -1,4 +1,4 @@
-package co.kr.imageapp.kakao.ui.main.fragment
+package co.kr.imageapp.kakao.ui.main.fragment.search
 
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
@@ -7,6 +7,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import co.kr.imageapp.kakao.R
+import dagger.hilt.android.AndroidEntryPoint
+
 
 class SearchFragment : Fragment() {
 

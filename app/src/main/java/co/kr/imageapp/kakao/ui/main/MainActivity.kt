@@ -1,21 +1,19 @@
 package co.kr.imageapp.kakao.ui.main
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.View
 import androidx.activity.viewModels
-import androidx.core.content.ContextCompat
 import androidx.viewpager2.widget.ViewPager2
-import co.kr.imageapp.kakao.R
 import co.kr.imageapp.kakao.databinding.ActivityMainBinding
 import co.kr.imageapp.kakao.ui.base.BaseActivity
 import co.kr.imageapp.kakao.ui.main.adapter.MainFragmentAdapter
-import co.kr.imageapp.kakao.ui.main.fragment.SearchFragment
+import co.kr.imageapp.kakao.ui.main.fragment.search.SearchFragment
 import com.google.android.material.tabs.TabLayoutMediator
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : BaseActivity() {
     private lateinit var mainBinding: ActivityMainBinding
-    private val mainViewModel: MainViewModel by viewModels()
+    private val mainViewModel: MainViewModel by viewModels<MainViewModel>()
 
     override fun observeViewModel() {
 
@@ -26,6 +24,12 @@ class MainActivity : BaseActivity() {
         val view = mainBinding.root
         setContentView(view)
         setViewPager()
+
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        mainViewModel.imageListLiveData
     }
 
     private fun setViewPager()= with(mainBinding) {

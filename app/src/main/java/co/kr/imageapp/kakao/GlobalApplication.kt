@@ -1,6 +1,7 @@
 package co.kr.imageapp.kakao
 
 import android.app.Application
+import dagger.hilt.android.HiltAndroidApp
 
-class GlobalApplication: Application() {
-}
+@HiltAndroidApp
+open class GlobalApplication: Application()
