@@ -7,6 +7,7 @@ import co.kr.imageapp.kakao.data.dto.search.ImageList
 import co.kr.imageapp.kakao.data.dto.search.SearchItem
 import co.kr.imageapp.kakao.data.dto.search.SearchItems
 import co.kr.imageapp.kakao.data.dto.search.VideoList
+import co.kr.imageapp.kakao.data.error.LAST_PAGE
 import co.kr.imageapp.kakao.data.error.NETWORK_ERROR
 import co.kr.imageapp.kakao.data.error.NO_INTERNET_CONNECTION
 import co.kr.imageapp.kakao.data.error.SEARCH_ERROR
@@ -18,15 +19,21 @@ import javax.inject.Inject
 
 class RemoteData @Inject
 constructor(private val serviceGenerator: ServiceGenerator, private val networkConnectivity: NetworkConnectivity) : RemoteDataSource {
-    override suspend fun requestImages(query: String): Resource<SearchItems> {
+    override suspend fun requestImages(query: String, page: Int): Resource<SearchItems> {
         val imageService = serviceGenerator.createService(KaKaoService::class.java)
-        return when (val responseBody: Any = processCall(imageService.fetchImages(query)) ?: SEARCH_ERROR) {
+        return when (val responseBody: Any = processCall(imageService.fetchImages(query, page)) ?: SEARCH_ERROR) {
             is ImageList -> {
                 val searchItems: ArrayList<SearchItem> = arrayListOf()
                 responseBody.documents.forEach { imageContent ->
                     searchItems.add(SearchItem(title = "$query - ${collectionToString(imageContent.collection)}", thumbnail_url = imageContent.thumbnail_url, image_url = imageContent.image_url,
                         url = imageContent.doc_url, play_time = null, datetime = imageContent.datetime,
-                        author = imageContent.display_sitename, searchType = IMAGE_TYPE))
+                        author = imageContent.display_sitename, width = imageContent.width, height = imageContent.height, searchType = IMAGE_TYPE))
+                }
+                if ( responseBody.documents.isEmpty()) {
+                    return Resource.DataError(errorCode = SEARCH_ERROR)
+                }
+                if (responseBody.meta.is_end) {
+                    return Resource.LastSuccess(SearchItems(searchItems))
                 }
                 Resource.Success(data = SearchItems(searchItems))
             }
@@ -36,14 +43,20 @@ constructor(private val serviceGenerator: ServiceGenerator, private val networkC
         }
     }
 
-    override suspend fun requestVideos(query: String): Resource<SearchItems> {
+    override suspend fun requestVideos(query: String, page: Int): Resource<SearchItems> {
         val videoService = serviceGenerator.createService(KaKaoService::class.java)
-        return when (val responseBody: Any = processCall(videoService.fetchVideos(query)) ?: SEARCH_ERROR) {
+        return when (val responseBody: Any = processCall(videoService.fetchVideos(query, page)) ?: SEARCH_ERROR) {
             is VideoList -> {
                 val searchItems: ArrayList<SearchItem> = arrayListOf()
                 responseBody.documents.forEach { videoContent ->
                     searchItems.add(SearchItem(title = videoContent.title, thumbnail_url = videoContent.thumbnail, image_url = null, url = videoContent.url,
                         play_time = videoContent.play_time, datetime = videoContent.datetime, author = videoContent.author, searchType = VIDEO_TYPE))
+                }
+                if ( responseBody.documents.isEmpty()) {
+                    return Resource.DataError(errorCode = SEARCH_ERROR)
+                }
+                if (responseBody.meta.is_end) {
+                    return Resource.LastSuccess(SearchItems(searchItems))
                 }
                 Resource.Success(data = SearchItems(searchItems))
             }

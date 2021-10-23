@@ -7,6 +7,6 @@ import kotlinx.coroutines.flow.Flow
 
 
 interface DataRepositorySource {
-    suspend fun requestImages(query: String): Flow<Resource<SearchItems>>
-    suspend fun requestVideos(query: String): Flow<Resource<SearchItems>>
+    suspend fun requestImages(query: String, page: Int): Flow<Resource<SearchItems>>
+    suspend fun requestVideos(query: String, page: Int): Flow<Resource<SearchItems>>
 }

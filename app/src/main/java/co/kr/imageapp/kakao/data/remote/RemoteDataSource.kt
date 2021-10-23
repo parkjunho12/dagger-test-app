@@ -6,6 +6,6 @@ import co.kr.imageapp.kakao.data.dto.search.SearchItems
 import co.kr.imageapp.kakao.data.dto.search.VideoList
 
 internal interface RemoteDataSource {
-    suspend fun requestImages(query: String): Resource<SearchItems>
-    suspend fun requestVideos(query: String): Resource<SearchItems>
+    suspend fun requestImages(query: String, page: Int): Resource<SearchItems>
+    suspend fun requestVideos(query: String, page: Int): Resource<SearchItems>
 }

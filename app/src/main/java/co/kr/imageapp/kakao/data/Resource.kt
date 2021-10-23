@@ -5,12 +5,14 @@ sealed class Resource<T>(
     val errorCode: Int? = null
 ) {
     class Success<T>(data: T) : Resource<T>(data)
+    class LastSuccess<T>(data: T) : Resource<T>(data)
     class Loading<T>(data: T? = null) : Resource<T>(data)
     class DataError<T>(errorCode: Int) : Resource<T>(null, errorCode)
 
     override fun toString(): String {
         return when (this) {
             is Success<*> -> "Success[data=$data]"
+            is LastSuccess<*> -> "LastSuccess[data=$data]"
             is DataError -> "Error[exception=$errorCode]"
             is Loading<T> -> "Loading"
         }

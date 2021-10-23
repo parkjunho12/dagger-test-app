@@ -98,6 +98,11 @@ dependencies {
     //progressBar
     implementation 'com.mikhaellopez:circularprogressbar:3.0.3'
 
+    // Room components
+    implementation "androidx.room:room-ktx:$roomVersion"
+    kapt "androidx.room:room-compiler:$roomVersion"
+    androidTestImplementation "androidx.room:room-testing:$roomVersion"
+
 
 }
 kapt {

@@ -7,9 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.kr.imageapp.kakao.data.DataRepositorySource
 import co.kr.imageapp.kakao.data.Resource
-import co.kr.imageapp.kakao.data.dto.search.ImageList
 import co.kr.imageapp.kakao.data.dto.search.SearchItems
-import co.kr.imageapp.kakao.data.dto.search.VideoList
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -27,19 +25,19 @@ constructor(private val dataRepositoryRepository: DataRepositorySource) : ViewMo
     private val showToastPrivate = MutableLiveData<String>()
     val showToast: LiveData<String> get() = showToastPrivate
 
-    fun getImages(query: String) {
+    fun getImages(query: String, page: Int) {
         viewModelScope.launch {
             searchListLiveDataPrivate.value = Resource.Loading()
-            dataRepositoryRepository.requestImages(query).collect {
+            dataRepositoryRepository.requestImages(query, page).collect {
                 searchListLiveDataPrivate.value = it
             }
         }
     }
 
-    fun getVideos(query: String) {
+    fun getVideos(query: String, page: Int) {
         viewModelScope.launch {
             searchListLiveDataPrivate.value = Resource.Loading()
-            dataRepositoryRepository.requestVideos(query).collect {
+            dataRepositoryRepository.requestVideos(query, page).collect {
                 searchListLiveDataPrivate.value = it
             }
         }

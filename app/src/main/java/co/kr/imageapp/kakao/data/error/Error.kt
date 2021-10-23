@@ -12,3 +12,4 @@ const val PASS_WORD_ERROR = -101
 const val USER_NAME_ERROR = -102
 const val CHECK_YOUR_FIELDS = -103
 const val SEARCH_ERROR = -104
+const val LAST_PAGE = -105

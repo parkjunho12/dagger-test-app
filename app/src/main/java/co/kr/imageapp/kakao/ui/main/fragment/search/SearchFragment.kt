@@ -12,16 +12,17 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.widget.SearchView
+import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import co.kr.imageapp.kakao.const.KeyConst.VIDEO_TYPE
 import co.kr.imageapp.kakao.data.Resource
-import co.kr.imageapp.kakao.data.dto.search.ImageList
 import co.kr.imageapp.kakao.data.dto.search.SearchItem
 import co.kr.imageapp.kakao.data.dto.search.SearchItems
-import co.kr.imageapp.kakao.data.dto.search.VideoList
 import co.kr.imageapp.kakao.data.error.DEFAULT_ERROR
 import co.kr.imageapp.kakao.data.error.NETWORK_ERROR
 import co.kr.imageapp.kakao.data.error.NO_INTERNET_CONNECTION
@@ -43,6 +44,10 @@ class SearchFragment : Fragment(), LifecycleObserver {
     private lateinit var searchAdapter: SearchAdapter
     private lateinit var gridLayoutManager: GridLayoutManager
     private lateinit var privateSearchItem: ArrayList<SearchItem>
+    private var page = 1
+    private var queryText = ""
+    private var videoLast = false
+    private var imageLast = false
 
 
     override fun onCreateView(
@@ -51,10 +56,33 @@ class SearchFragment : Fragment(), LifecycleObserver {
     ): View? {
         searchBinding = SearchFragmentBinding.inflate(layoutInflater)
         setTextListener()
-        gridLayoutManager = GridLayoutManager(requireContext(), 3)
+        setScrollListener()
+        gridLayoutManager = GridLayoutManager(requireContext(), 2)
         searchBinding.recyclerviewMain.layoutManager = gridLayoutManager
         privateSearchItem = arrayListOf()
         return searchBinding.root
+    }
+
+    private fun setScrollListener() = with(searchBinding){
+        recyclerviewMain.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+
+                val layoutManager = recyclerviewMain.layoutManager
+
+                // hasNextPage() -> 다음 페이지가 있는 경우
+                if (!circularProgressBar.isVisible) {
+                    val lastVisibleItem = (layoutManager as LinearLayoutManager)
+                        .findLastCompletelyVisibleItemPosition()
+
+                    // 마지막으로 보여진 아이템 position 이
+                    // 전체 아이템 개수보다 5개 모자란 경우, 데이터를 loadMore 한다
+                    if (layoutManager.itemCount <= lastVisibleItem + 2) {
+                        queryImages(queryText, page++)
+                    }
+                }
+            }
+        })
     }
 
     private fun setTextListener() = with(searchBinding) {
@@ -63,7 +91,11 @@ class SearchFragment : Fragment(), LifecycleObserver {
                 return if (query != null) {
                     if (query.length >= 2) {
                         privateSearchItem.clear()
-                        queryImages(query)
+                        page = 1
+                        queryText = query
+                        imageLast = false
+                        videoLast = false
+                        queryImages(query, page++)
                         searchBinding.root.hideKeyboard()
                         true
                     } else {
@@ -83,9 +115,13 @@ class SearchFragment : Fragment(), LifecycleObserver {
         })
     }
 
-    private fun queryImages(query: String) {
-        viewModel.getImages(query)
-        viewModel.getVideos(query)
+    private fun queryImages(query: String, page: Int) {
+        if (!imageLast) {
+            viewModel.getImages(query, page)
+        }
+        if (!videoLast) {
+            viewModel.getVideos(query, page)
+        }
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
@@ -97,8 +133,13 @@ class SearchFragment : Fragment(), LifecycleObserver {
 
     private fun observeViewModel() {
         observe(viewModel.searchListLiveDataPrivate, ::handleImageList)
+        observe(viewModel.showToast, ::observeToast)
     }
 
+
+    private fun observeToast(event: String) {
+       Toast.makeText(requireContext(), event, Toast.LENGTH_SHORT).show()
+    }
 
     private fun bindImageListData(searchItems: SearchItems) = with(searchBinding) {
         if (!(searchItems.searchItemList.isNullOrEmpty())) {
@@ -114,15 +155,43 @@ class SearchFragment : Fragment(), LifecycleObserver {
         }
     }
 
+    private fun bindLastImageData(searchItems: SearchItems) = with(searchBinding) {
+        if (!(searchItems.searchItemList.isNullOrEmpty())) {
+            if (searchItems.searchItemList[0].searchType == VIDEO_TYPE) {
+                videoLast = true
+            } else {
+                imageLast = true
+            }
+            privateSearchItem.addAll(searchItems.searchItemList)
+            privateSearchItem.sortDateTime()
+            privateSearchItem.forEach { println(it.datetime) }
+            searchAdapter = SearchAdapter(viewModel, privateSearchItem)
+            recyclerviewMain.adapter = searchAdapter
+            recyclerviewMain.adapter!!.notifyDataSetChanged()
+            showDataView(true)
+        } else {
+            showDataView(false)
+        }
+    }
+
+
     private fun handleImageList(status: Resource<SearchItems>) {
         when (status) {
             is Resource.Loading -> showLoadingView()
             is Resource.Success -> status.data?.let {
                 bindImageListData(it)
             }
+            is Resource.LastSuccess -> status.data?.let {
+                bindLastImageData(it)
+            }
             is Resource.DataError -> {
-                showDataView(false)
-                returnErrorCode(status.errorCode).let { viewModel.showToastMessage(it) }
+                if (status.errorCode == SEARCH_ERROR) {
+                    returnErrorCode(status.errorCode).let { viewModel.showToastMessage(it) }
+                    searchBinding.circularProgressBar.toGone()
+                } else {
+                    showDataView(false)
+                    returnErrorCode(status.errorCode).let { viewModel.showToastMessage(it) }
+                }
             }
         }
     }
@@ -144,7 +213,7 @@ class SearchFragment : Fragment(), LifecycleObserver {
                 "기본 에러"
             }
             SEARCH_ERROR -> {
-                "검색 에러"
+                "검색 마지막 결과입니다."
             }
             else -> ""
         }

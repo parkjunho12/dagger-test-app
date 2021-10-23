@@ -12,10 +12,10 @@ import retrofit2.http.Query
 interface KaKaoService {
     @Headers("Authorization: KakaoAK ${KeyConst.REST_API_KEY}")
     @GET("v2/search/image")
-    suspend fun fetchImages(@Query("query")query: String): Response<ImageList>
+    suspend fun fetchImages(@Query("query") query: String,@Query("page") page: Int = 1): Response<ImageList>
 
 
     @Headers("Authorization: KakaoAK ${KeyConst.REST_API_KEY}")
     @GET("v2/search/vclip")
-    suspend fun fetchVideos(@Query("query")query: String): Response<VideoList>
+    suspend fun fetchVideos(@Query("query") query: String,@Query("page") page: Int = 1): Response<VideoList>
 }
