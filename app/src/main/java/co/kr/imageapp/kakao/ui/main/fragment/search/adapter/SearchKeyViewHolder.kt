@@ -20,5 +20,8 @@ class SearchKeyViewHolder(private val itemBinding: ItemSearchBinding): RecyclerV
         itemBinding.searchCancel.setOnClickListener{
             recyclerItemListener.onSearchKeySelected(searchData = searchItem)
         }
+        itemBinding.searchConlayout.setOnClickListener {
+            recyclerItemListener.onSearchKeyClick(searchData = searchItem)
+        }
     }
 }

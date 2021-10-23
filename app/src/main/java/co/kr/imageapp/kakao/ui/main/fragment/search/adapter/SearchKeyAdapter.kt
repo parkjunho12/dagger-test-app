@@ -15,11 +15,17 @@ class SearchKeyAdapter (private val searchViewModel: SearchViewModel, private va
 
     private val onItemClickListener: RecyclerItemListener = object : RecyclerItemListener {
         override fun onItemSelected(searchItem: SearchItem) {
-            searchViewModel
+
         }
 
         override fun onSearchKeySelected(searchData: SearchData) {
             searchViewModel.deleteSearchData(searchData.searchKey)
+        }
+
+        override fun onSearchKeyClick(searchData: SearchData) {
+            searchViewModel.getImages(searchData.searchKey)
+            searchViewModel.getVideos(searchData.searchKey)
+            searchViewModel.page++
         }
     }
 

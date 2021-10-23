@@ -6,4 +6,5 @@ import co.kr.imageapp.kakao.data.dto.search.SearchItem
 interface RecyclerItemListener {
     fun onItemSelected(searchItem : SearchItem)
     fun onSearchKeySelected(searchData: SearchData)
+    fun onSearchKeyClick(searchData: SearchData)
 }

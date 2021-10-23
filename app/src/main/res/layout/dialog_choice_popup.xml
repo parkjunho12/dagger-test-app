@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="328dp"
+        android:layout_height="232dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:background="@drawable/elevation_background"
+        >
+        <TextView
+            android:id="@+id/choice_popup_title"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text = "타이틀"
+            android:textColor="@color/black"
+            android:textSize="22dp"
+            android:textStyle="bold"
+            android:layout_marginTop="30dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:id="@+id/choice_popup_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/choice_popup_title"
+            app:layout_constraintBottom_toTopOf="@id/choice_popup_lin"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:textSize="16dp"
+            android:gravity="center"
+            android:textColor="@color/black"
+            tools:text ="내 보관함에 추가 하시겠습니까?"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <LinearLayout
+            android:id="@+id/choice_popup_lin"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginBottom="24dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <Button
+                android:id="@+id/choice_popup_cancel_btn"
+                android:text="아니요"
+                android:textColor="@color/black"
+                android:background="@drawable/signup_btn_retry"
+                android:textSize="14dp"
+                android:textStyle="bold"
+                android:layout_marginEnd="6dp"
+                android:layout_width="96dp"
+                android:layout_height="40dp"/>
+
+            <Button
+                android:id="@+id/choice_popup_ok_btn"
+                android:text="@string/ok"
+                android:layout_marginStart="6dp"
+                android:textSize="14dp"
+                android:textStyle="bold"
+                android:textColor="@color/white"
+                android:background="@drawable/intro_btn_next"
+                android:layout_width="96dp"
+                android:layout_height="40dp"/>
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

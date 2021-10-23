@@ -7,6 +7,7 @@ import java.io.Serializable
 
 @Entity(tableName = "Search")
 data class SearchData(
-    @PrimaryKey(autoGenerate = true) val index: Int = 0,
-    @ColumnInfo val searchKey: String
+    @PrimaryKey
+    @ColumnInfo
+    val searchKey: String
 ) : Serializable

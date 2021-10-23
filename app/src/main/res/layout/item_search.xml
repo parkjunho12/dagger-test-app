@@ -8,15 +8,18 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:elevation="1dp"
-        android:layout_margin="5dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:id="@+id/searchConlayout"
         android:background="@drawable/search_item_background"
         android:layout_width="match_parent"
         android:layout_height="40dp">
         <TextView
             android:id="@+id/searchTitle"
             tools:text = "예시"
-            android:textColor="@color/black"
             android:layout_marginStart="5dp"
+            android:textColor="@color/black"
             android:textSize="17sp"
             android:textStyle="bold"
             android:layout_marginTop="4dp"

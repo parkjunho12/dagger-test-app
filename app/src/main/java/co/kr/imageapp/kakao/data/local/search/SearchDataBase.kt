@@ -11,7 +11,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-@Database(entities = [SearchData::class], version = 2)
+@Database(entities = [SearchData::class], version = 3)
 abstract class SearchDataBase : RoomDatabase(){
     abstract fun searchDao(): SearchDao
 

@@ -8,7 +8,9 @@ import androidx.lifecycle.viewModelScope
 import co.kr.imageapp.kakao.data.DataRepositorySource
 import co.kr.imageapp.kakao.data.Resource
 import co.kr.imageapp.kakao.data.dto.search.SearchData
+import co.kr.imageapp.kakao.data.dto.search.SearchItem
 import co.kr.imageapp.kakao.data.dto.search.SearchItems
+import co.kr.imageapp.kakao.util.SingleEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -23,12 +25,8 @@ constructor(private val dataRepositoryRepository: DataRepositorySource) : ViewMo
     val searchListLiveData: LiveData<Resource<SearchItems>> get() = searchListLiveDataPrivate
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    private val showToastPrivate = MutableLiveData<String>()
-    val showToast: LiveData<String> get() = showToastPrivate
-
-    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    private val insertQueryPrivate = MutableLiveData<Resource<Boolean>>()
-    val insertQuery: LiveData<Resource<Boolean>> get() = insertQueryPrivate
+    private val showToastPrivate = MutableLiveData<SingleEvent<Any>>()
+    val showToast: LiveData<SingleEvent<Any>> get() = showToastPrivate
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     private val deleteQueryPrivate = MutableLiveData<Resource<Boolean>>()
@@ -39,31 +37,36 @@ constructor(private val dataRepositoryRepository: DataRepositorySource) : ViewMo
     val searchLiveData: LiveData<Resource<List<SearchData>>> get() = searchLiveDataPrivate
 
 
-    fun getImages(query: String, page: Int) {
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    private val clickImagePrivate = MutableLiveData<SingleEvent<SearchItem>>()
+    val clickImage: LiveData<SingleEvent<SearchItem>> get() = clickImagePrivate
+
+    var page = 1
+    var queryText = ""
+
+
+    fun getImages(query: String) {
         viewModelScope.launch {
             searchListLiveDataPrivate.value = Resource.Loading()
-            dataRepositoryRepository.requestImages(query, page).collect {
+            queryText = query
+            dataRepositoryRepository.requestImages(queryText, page).collect {
                 searchListLiveDataPrivate.value = it
             }
         }
     }
 
-    fun getVideos(query: String, page: Int) {
+    fun getVideos(query: String) {
         viewModelScope.launch {
             searchListLiveDataPrivate.value = Resource.Loading()
-            dataRepositoryRepository.requestVideos(query, page).collect {
+            queryText = query
+            dataRepositoryRepository.requestVideos(queryText, page).collect {
                 searchListLiveDataPrivate.value = it
             }
         }
     }
 
     fun insertSearchText(query: String) {
-        viewModelScope.launch {
-            insertQueryPrivate.value = Resource.Loading()
-            dataRepositoryRepository.requestInsertQuery(query).collect {
-                insertQueryPrivate.value = it
-            }
-        }
+        dataRepositoryRepository.requestInsertQuery(query)
     }
 
     fun getSearchData() {
@@ -84,8 +87,12 @@ constructor(private val dataRepositoryRepository: DataRepositorySource) : ViewMo
         }
     }
 
+    fun clickImage(searchItem: SearchItem) {
+        clickImagePrivate.value = SingleEvent(searchItem)
+    }
+
     fun showToastMessage(errorMsg: String) {
-        showToastPrivate.value = errorMsg
+        showToastPrivate.value = SingleEvent(errorMsg)
     }
 
 }

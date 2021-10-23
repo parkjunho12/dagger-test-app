@@ -1,7 +1,6 @@
 package co.kr.imageapp.kakao.ui.main.fragment.search
 
 import android.content.Context
-import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -13,9 +12,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.isVisible
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleObserver
-import androidx.lifecycle.OnLifecycleEvent
+import androidx.lifecycle.*
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -32,6 +29,7 @@ import co.kr.imageapp.kakao.databinding.SearchFragmentBinding
 import co.kr.imageapp.kakao.ui.main.fragment.search.adapter.SearchAdapter
 import co.kr.imageapp.kakao.ui.main.fragment.search.adapter.SearchKeyAdapter
 import co.kr.imageapp.kakao.util.*
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -48,7 +46,6 @@ class SearchFragment : Fragment(), LifecycleObserver {
     private lateinit var gridLayoutManager: GridLayoutManager
     private lateinit var privateSearchItem: ArrayList<SearchItem>
     private lateinit var linearLayoutManager: LinearLayoutManager
-    private var page = 1
     private var queryText = ""
     private var videoLast = false
     private var imageLast = false
@@ -66,6 +63,14 @@ class SearchFragment : Fragment(), LifecycleObserver {
         searchBinding.recyclerviewMain.layoutManager = gridLayoutManager
         searchBinding.recyclerviewSearch.layoutManager = linearLayoutManager
         privateSearchItem = arrayListOf()
+        viewModel = ViewModelProvider(this).get(SearchViewModel::class.java)
+        observeViewModel()
+        searchAdapter = SearchAdapter(viewModel, privateSearchItem)
+        searchBinding.recyclerviewMain.adapter = searchAdapter
+        searchBinding.upWardBtn.setOnClickListener {
+            searchBinding.recyclerviewMain.scrollToPosition(0)
+        }
+        getCurrentSearch()
         return searchBinding.root
     }
 
@@ -82,12 +87,19 @@ class SearchFragment : Fragment(), LifecycleObserver {
 
                     // 마지막으로 보여진 아이템 position 이
                     // 전체 아이템 개수보다 5개 모자란 경우, 데이터를 loadMore 한다
-                    if (layoutManager.itemCount <= lastVisibleItem + 2) {
-                        queryImages(queryText, page++)
+                    if (layoutManager.itemCount <= lastVisibleItem + 5 && lastVisibleItem != -1) {
+                        queryImages(viewModel.queryText)
                     }
                 }
             }
         })
+    }
+
+    private fun refreshStatus() {
+        privateSearchItem.clear()
+        viewModel.page = 1
+        imageLast = false
+        videoLast = false
     }
 
     private fun setTextListener() = with(searchBinding) {
@@ -95,12 +107,9 @@ class SearchFragment : Fragment(), LifecycleObserver {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 return if (query != null) {
                     if (query.length >= 2) {
-                        privateSearchItem.clear()
-                        page = 1
+                        refreshStatus()
                         queryText = query
-                        imageLast = false
-                        videoLast = false
-                        queryImages(query, page++)
+                        queryImages(query)
                         viewModel.insertSearchText(query)
                         searchBinding.root.hideKeyboard()
                         true
@@ -121,23 +130,22 @@ class SearchFragment : Fragment(), LifecycleObserver {
         })
     }
 
-    private fun queryImages(query: String, page: Int) {
-        searchBinding.recyclerviewSearch.toGone()
-        searchBinding.tvNoKeyData.toGone()
+    private fun queryImages(query: String) {
         if (!imageLast) {
-            viewModel.getImages(query, page)
+            viewModel.getImages(query)
         }
         if (!videoLast) {
-            viewModel.getVideos(query, page)
+            viewModel.getVideos(query)
         }
+        viewModel.page++
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
     fun onCreated() {
         Log.i("tag", "reached the State.Created")
-        viewModel = ViewModelProvider(this).get(SearchViewModel::class.java)
-        observeViewModel()
         getCurrentSearch()
+        refreshStatus()
+        searchBinding.searchBar.setQuery("", false)
     }
 
     private fun getCurrentSearch() {
@@ -145,23 +153,28 @@ class SearchFragment : Fragment(), LifecycleObserver {
     }
 
     private fun observeViewModel() {
-        observe(viewModel.searchListLiveDataPrivate, ::handleImageList)
-        observe(viewModel.showToast, ::observeToast)
+        observe(viewModel.searchListLiveData, ::handleImageList)
+        observeToast(viewModel.showToast)
         observe(viewModel.searchLiveData, ::handleSearchData)
+        observe(viewModel.deleteQuery, ::handleDeleteQuery)
+        observeEvent(viewModel.clickImage, ::popupItemDetail)
+    }
+
+    private fun popupItemDetail(clickEvent: SingleEvent<SearchItem>) {
+        clickEvent.getContentIfNotHandled()?.let {
+
+        }
     }
 
 
-    private fun observeToast(event: String) {
-       Toast.makeText(requireContext(), event, Toast.LENGTH_SHORT).show()
+    private fun observeToast(event: LiveData<SingleEvent<Any>>) {
+        searchBinding.root.showToast(this, event, Snackbar.LENGTH_LONG)
     }
 
     private fun bindImageListData(searchItems: SearchItems) = with(searchBinding) {
         if (!(searchItems.searchItemList.isNullOrEmpty())) {
             privateSearchItem.addAll(searchItems.searchItemList)
             privateSearchItem.sortDateTime()
-            privateSearchItem.forEach { println(it.datetime) }
-            searchAdapter = SearchAdapter(viewModel, privateSearchItem)
-            recyclerviewMain.adapter = searchAdapter
             recyclerviewMain.adapter!!.notifyDataSetChanged()
             showDataView(true)
         } else {
@@ -178,9 +191,6 @@ class SearchFragment : Fragment(), LifecycleObserver {
             }
             privateSearchItem.addAll(searchItems.searchItemList)
             privateSearchItem.sortDateTime()
-            privateSearchItem.forEach { println(it.datetime) }
-            searchAdapter = SearchAdapter(viewModel, privateSearchItem)
-            recyclerviewMain.adapter = searchAdapter
             recyclerviewMain.adapter!!.notifyDataSetChanged()
             showDataView(true)
         } else {
@@ -190,7 +200,7 @@ class SearchFragment : Fragment(), LifecycleObserver {
 
     private fun handleSearchData(status: Resource<List<SearchData>>) {
         when (status) {
-            is Resource.Loading -> showLoadingView()
+            is Resource.Loading -> showKeyLoadingView()
             is Resource.Success -> status.data?.let {
                 bindSearchKeyData(it)
             }
@@ -203,6 +213,26 @@ class SearchFragment : Fragment(), LifecycleObserver {
         }
     }
 
+    private fun handleDeleteQuery(status: Resource<Boolean>) {
+        when (status) {
+            is Resource.Loading -> showKeyLoadingView()
+            is Resource.Success -> status.data?.let {
+               if (it) {
+                   getCurrentSearch()
+               }
+            }
+            is Resource.LastSuccess -> status.data?.let {
+                if (it) {
+                    getCurrentSearch()
+                }
+            }
+            is Resource.DataError -> {
+                showSearchKey(false)
+            }
+        }
+    }
+
+
     private fun bindSearchKeyData(it: List<SearchData>)  = with(searchBinding) {
         if (!(it.isNullOrEmpty())) {
             searchKeyAdapter = SearchKeyAdapter(viewModel, it)
@@ -210,6 +240,9 @@ class SearchFragment : Fragment(), LifecycleObserver {
             recyclerviewSearch.adapter!!.notifyDataSetChanged()
             showSearchKey(true)
         } else {
+            searchKeyAdapter = SearchKeyAdapter(viewModel, it)
+            recyclerviewSearch.adapter = searchKeyAdapter
+            recyclerviewSearch.adapter!!.notifyDataSetChanged()
             showSearchKey(false)
         }
     }
@@ -239,6 +272,15 @@ class SearchFragment : Fragment(), LifecycleObserver {
     private fun showLoadingView() = with(searchBinding) {
         circularProgressBar.toVisible()
         tvNoData.toGone()
+        recyclerviewSearch.toGone()
+        tvNoKeyData.toGone()
+    }
+
+    private fun showKeyLoadingView() = with(searchBinding) {
+        circularProgressBar.toVisible()
+        tvNoData.toGone()
+        recyclerviewSearch.toVisible()
+        recyclerviewMain.toGone()
     }
 
     private fun returnErrorCode(errorCode: Int?): String {
@@ -262,6 +304,7 @@ class SearchFragment : Fragment(), LifecycleObserver {
     private fun showSearchKey(show: Boolean) = with(searchBinding) {
         tvNoKeyData.visibility = if (show) GONE else VISIBLE
         recyclerviewSearch.visibility = if (show) VISIBLE else GONE
+        circularProgressBar.toGone()
     }
 
     private fun showDataView(show: Boolean) = with(searchBinding) {

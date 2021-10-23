@@ -43,5 +43,8 @@ class SearchViewHolder(private val itemBinding: CardviewItemImageBinding): Recyc
         }
         itemBinding.imgSiteName.text = searchItem.author
         itemBinding.imgDateTime.text = searchItem.datetime.split("T")[0]
+        itemBinding.root.setOnClickListener {
+            recyclerItemListener.onItemSelected(searchItem)
+        }
     }
 }

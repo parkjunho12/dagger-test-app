@@ -56,3 +56,21 @@ fun View.toGone() {
 fun View.toInvisible() {
     this.visibility = View.GONE
 }
+
+fun View.showToast(
+    lifecycleOwner: LifecycleOwner,
+    ToastEvent: LiveData<SingleEvent<Any>>,
+    timeLength: Int
+) {
+
+    ToastEvent.observe(lifecycleOwner, Observer { event ->
+        event.getContentIfNotHandled()?.let {
+            when (it) {
+                is String -> Toast.makeText(this.context, it, timeLength).show()
+                is Int -> Toast.makeText(this.context, this.context.getString(it), timeLength).show()
+                else -> {
+                }
+            }
+        }
+    })
+}
