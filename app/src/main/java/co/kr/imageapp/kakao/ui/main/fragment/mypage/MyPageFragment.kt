@@ -1,7 +1,8 @@
 package co.kr.imageapp.kakao.ui.main.fragment.mypage
 
 import android.content.Context
-import androidx.lifecycle.ViewModelProvider
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -10,32 +11,31 @@ import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleObserver
-import androidx.lifecycle.OnLifecycleEvent
+import androidx.lifecycle.*
 import androidx.recyclerview.widget.GridLayoutManager
 import co.kr.imageapp.kakao.R
+import co.kr.imageapp.kakao.const.KeyConst.IMAGE_TYPE
 import co.kr.imageapp.kakao.data.Resource
 import co.kr.imageapp.kakao.data.dto.mypage.ImageData
+import co.kr.imageapp.kakao.data.dto.search.SearchItem
 import co.kr.imageapp.kakao.data.dto.search.SearchItems
 import co.kr.imageapp.kakao.data.error.DEFAULT_ERROR
 import co.kr.imageapp.kakao.data.error.NETWORK_ERROR
 import co.kr.imageapp.kakao.data.error.NO_INTERNET_CONNECTION
 import co.kr.imageapp.kakao.data.error.SEARCH_ERROR
 import co.kr.imageapp.kakao.databinding.MyPageFragmentBinding
+import co.kr.imageapp.kakao.ui.dialog.DialogPopup
 import co.kr.imageapp.kakao.ui.main.fragment.mypage.adapter.MyPageAdapter
 import co.kr.imageapp.kakao.ui.main.fragment.search.SearchViewModel
 import co.kr.imageapp.kakao.ui.main.fragment.search.adapter.SearchAdapter
-import co.kr.imageapp.kakao.util.observe
-import co.kr.imageapp.kakao.util.sortDateTime
-import co.kr.imageapp.kakao.util.toGone
-import co.kr.imageapp.kakao.util.toVisible
+import co.kr.imageapp.kakao.util.*
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.my_page_fragment.*
 
 
 @AndroidEntryPoint
-class MyPageFragment : Fragment(), LifecycleObserver {
+class MyPageFragment : Fragment(), LifecycleObserver, DialogPopup.OnChoiceListener {
 
     companion object {
         fun newInstance() = MyPageFragment()
@@ -57,6 +57,7 @@ class MyPageFragment : Fragment(), LifecycleObserver {
         observeViewModel()
         return myPageBinding.root
     }
+
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
     fun onCreated(){
         Log.i("tag","reached the State.Created")
@@ -117,9 +118,53 @@ class MyPageFragment : Fragment(), LifecycleObserver {
         }
     }
 
+    private fun observeToast(event: LiveData<SingleEvent<Any>>) {
+        myPageBinding.root.showToast(this, event, Snackbar.LENGTH_LONG)
+    }
+
 
     private fun observeViewModel() {
         observe(viewModel.imageLiveData, ::handleMyImages)
+        observe(viewModel.deleteMyImage, ::handleDeleteImage)
+        observeToast(viewModel.showToast)
+        observeEvent(viewModel.clickMyImage, ::popupItemDetail)
+    }
+
+    private fun popupItemDetail(clickEvent: SingleEvent<ImageData>) {
+        clickEvent.getContentIfNotHandled()?.let {
+            val imageData = clickEvent.peekContent()
+            val searchItem = SearchItem(title = imageData.title, thumbnail_url = imageData.imageUri, image_url = imageData.imageUri,
+            url = imageData.linkUrl, play_time = imageData.playTime, datetime = imageData.datetime, author = imageData.author, searchType = IMAGE_TYPE)
+            val popupSearchClick = DialogPopup.newInstance(searchItem, true, requireContext())
+            popupSearchClick.addChoiceListener(this)
+            parentFragmentManager.beginTransaction().add(popupSearchClick, "DialogFragmnet Tag")
+                .commitAllowingStateLoss()
+        }
+    }
+
+    private fun handleDeleteImage(status: Resource<Boolean>) {
+        when (status) {
+            is Resource.Loading -> showLoadingView()
+            is Resource.Success -> status.data?.let {
+                if(it) {
+                    viewModel.getMyImages()
+                }
+            }
+            is Resource.LastSuccess -> status.data?.let {
+                if(it) {
+                    viewModel.getMyImages()
+                }
+            }
+            is Resource.DataError -> {
+                if (status.errorCode == SEARCH_ERROR) {
+                    showDataView(false)
+                    returnErrorCode(status.errorCode).let { viewModel.showToastMessage(it) }
+                } else {
+                    showDataView(false)
+                    returnErrorCode(status.errorCode).let { viewModel.showToastMessage(it) }
+                }
+            }
+        }
     }
 
     private fun returnErrorCode(errorCode: Int?): String {
@@ -138,5 +183,18 @@ class MyPageFragment : Fragment(), LifecycleObserver {
             }
             else -> ""
         }
+    }
+
+    override fun clickCancel() {
+
+    }
+
+    override fun clickOk(imageData: ImageData) {
+        val browserIntent = Intent(
+            Intent.ACTION_VIEW, Uri.parse(
+                imageData.linkUrl
+            )
+        )
+        startActivity(browserIntent)
     }
 }

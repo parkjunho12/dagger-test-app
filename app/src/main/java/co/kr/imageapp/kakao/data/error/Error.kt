@@ -12,3 +12,4 @@ const val CHECK_YOUR_FIELDS = -103
 const val SEARCH_ERROR = -104
 const val INSERT_ERROR = -105
 const val SELECT_ERROR = -106
+const val DELET_ERROR = -107

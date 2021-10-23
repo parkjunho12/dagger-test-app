@@ -3,6 +3,7 @@ package co.kr.imageapp.kakao.data.local
 import co.kr.imageapp.kakao.data.Resource
 import co.kr.imageapp.kakao.data.dto.mypage.ImageData
 import co.kr.imageapp.kakao.data.dto.search.SearchData
+import co.kr.imageapp.kakao.data.error.DELET_ERROR
 import co.kr.imageapp.kakao.data.error.INSERT_ERROR
 import co.kr.imageapp.kakao.data.error.SELECT_ERROR
 import co.kr.imageapp.kakao.data.local.mypage.ImageDao
@@ -58,6 +59,16 @@ constructor(private val imageDao: ImageDao, private val searchDao: SearchDao): L
         } catch (e: Exception) {
             e.printStackTrace()
             Resource.DataError(SELECT_ERROR)
+        }
+    }
+
+    override fun deleteMyImage(imageData: ImageData): Resource<Boolean> {
+        return try {
+            imageDao.delete(imageData)
+            Resource.Success(true)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Resource.DataError(DELET_ERROR)
         }
     }
 }

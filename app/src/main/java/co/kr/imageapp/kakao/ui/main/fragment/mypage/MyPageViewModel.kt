@@ -9,6 +9,7 @@ import co.kr.imageapp.kakao.data.DataRepositorySource
 import co.kr.imageapp.kakao.data.Resource
 import co.kr.imageapp.kakao.data.dto.mypage.ImageData
 import co.kr.imageapp.kakao.data.dto.search.SearchData
+import co.kr.imageapp.kakao.data.dto.search.SearchItem
 import co.kr.imageapp.kakao.util.SingleEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collect
@@ -26,6 +27,15 @@ constructor(private val dataRepositoryRepository: DataRepositorySource) : ViewMo
     private val showToastPrivate = MutableLiveData<SingleEvent<Any>>()
     val showToast: LiveData<SingleEvent<Any>> get() = showToastPrivate
 
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    private val clickMyImagePrivate = MutableLiveData<SingleEvent<ImageData>>()
+    val clickMyImage: LiveData<SingleEvent<ImageData>> get() = clickMyImagePrivate
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    private val deleteMyImagePrivate = MutableLiveData<Resource<Boolean>>()
+    val deleteMyImage: LiveData<Resource<Boolean>> get() = deleteMyImagePrivate
+
+
     fun getMyImages() {
         viewModelScope.launch {
             imageLiveDataPrivate.value = Resource.Loading()
@@ -37,6 +47,19 @@ constructor(private val dataRepositoryRepository: DataRepositorySource) : ViewMo
 
     fun showToastMessage(errorMsg: String) {
         showToastPrivate.value = SingleEvent(errorMsg)
+    }
+
+    fun clickImage(imageData: ImageData) {
+        clickMyImagePrivate.value = SingleEvent(imageData)
+    }
+
+    fun deleteImage(imageData: ImageData) {
+        viewModelScope.launch {
+            imageLiveDataPrivate.value = Resource.Loading()
+            dataRepositoryRepository.deleteMyImage(imageData).collect {
+                deleteMyImagePrivate.value = it
+            }
+        }
     }
 
 

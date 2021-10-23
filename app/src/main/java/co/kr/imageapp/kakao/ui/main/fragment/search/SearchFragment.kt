@@ -64,7 +64,6 @@ class SearchFragment : Fragment(), LifecycleObserver, DialogPopup.OnChoiceListen
         gridLayoutManager = GridLayoutManager(requireContext(), 2)
         linearLayoutManager = LinearLayoutManager(requireContext())
         searchBinding.recyclerviewMain.layoutManager = gridLayoutManager
-        searchBinding.recyclerviewMain.setHasFixedSize(true)
         searchBinding.recyclerviewSearch.layoutManager = linearLayoutManager
         searchBinding.recyclerviewSearch.setHasFixedSize(true)
         privateSearchItem = arrayListOf()
@@ -173,7 +172,7 @@ class SearchFragment : Fragment(), LifecycleObserver, DialogPopup.OnChoiceListen
     private fun popupItemDetail(clickEvent: SingleEvent<SearchItem>) {
         clickEvent.getContentIfNotHandled()?.let {
             val searchItem = clickEvent.peekContent()
-            val popupSearchClick = DialogPopup.newInstance(searchItem, requireContext())
+            val popupSearchClick = DialogPopup.newInstance(searchItem, false, requireContext())
             popupSearchClick.addChoiceListener(this)
             parentFragmentManager.beginTransaction().add(popupSearchClick, "DialogFragmnet Tag")
                 .commitAllowingStateLoss()

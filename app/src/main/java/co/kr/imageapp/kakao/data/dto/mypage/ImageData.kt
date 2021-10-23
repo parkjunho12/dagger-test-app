@@ -13,5 +13,6 @@ data class ImageData(
     @ColumnInfo val title: String,
     @ColumnInfo val linkUrl: String,
     @ColumnInfo val playTime: Int = 0,
+    @ColumnInfo val author: String = "",
     @ColumnInfo val datetime: String
 ) : Serializable

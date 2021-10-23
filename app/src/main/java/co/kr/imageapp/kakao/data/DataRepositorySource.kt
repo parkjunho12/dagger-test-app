@@ -17,4 +17,5 @@ interface DataRepositorySource {
     fun deleteSearchData(searchKey: String): Flow<Resource<Boolean>>
     fun insertImageToMyPage(imageData: ImageData): Flow<Resource<Boolean>>
     fun selectImageToMyPage(): Flow<Resource<List<ImageData>>>
+    fun deleteMyImage(imageData: ImageData): Flow<Resource<Boolean>>
 }

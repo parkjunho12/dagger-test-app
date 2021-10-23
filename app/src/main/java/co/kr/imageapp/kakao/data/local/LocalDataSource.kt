@@ -12,4 +12,5 @@ interface LocalDataSource {
     fun deleteSearchData(searchKey: String): Resource<Boolean>
     fun insertImageToMyPage(imageData: ImageData): Resource<Boolean>
     fun selectImageToMyPage(): Resource<List<ImageData>>
+    fun deleteMyImage(imageData: ImageData): Resource<Boolean>
 }

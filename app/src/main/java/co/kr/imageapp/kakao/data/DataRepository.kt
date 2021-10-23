@@ -56,4 +56,10 @@ class DataRepository @Inject constructor(private val remoteRepository: RemoteDat
             emit(localData.selectImageToMyPage())
         }.flowOn(ioDispatcher)
     }
+
+    override fun deleteMyImage(imageData: ImageData): Flow<Resource<Boolean>> {
+        return flow {
+            emit(localData.deleteMyImage(imageData))
+        }.flowOn(ioDispatcher)
+    }
 }

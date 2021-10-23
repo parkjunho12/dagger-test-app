@@ -21,11 +21,13 @@ import co.kr.imageapp.kakao.util.toVisible
 
 
 private const val IMAGE_PARAM = "image_param"
+private const val MYPAGE_PARAM ="my_param"
 
 class DialogPopup(context: Context): DialogFragment() {
     private var onChoiceListener: OnChoiceListener? = null
     private var searchItem: SearchItem? = null
     val mContext = context
+    private var isMypage = false
     private lateinit var choiceBinding: DialogChoicePopupBinding
 
     interface OnChoiceListener{
@@ -41,6 +43,7 @@ class DialogPopup(context: Context): DialogFragment() {
         super.onCreate(savedInstanceState)
         arguments?.let {
             searchItem = it.getSerializable(IMAGE_PARAM) as SearchItem
+            isMypage = it.getBoolean(MYPAGE_PARAM)
         }
     }
 
@@ -84,9 +87,11 @@ class DialogPopup(context: Context): DialogFragment() {
         popupOkBtn.setOnClickListener {
             if (searchItem != null) {
                 val imageData = if (searchItem!!.searchType == VIDEO_TYPE) {
-                    ImageData(imageUri = searchItem!!.thumbnail_url,title = searchItem!!.title, linkUrl = searchItem!!.url, datetime = searchItem!!.datetime)
+                    ImageData(imageUri = searchItem!!.thumbnail_url,title = searchItem!!.title, linkUrl = searchItem!!.url,
+                        playTime = searchItem!!.play_time!!, author = searchItem!!.author!!, datetime = searchItem!!.datetime)
                 } else {
-                    ImageData(imageUri = searchItem!!.image_url!!,title = searchItem!!.title, linkUrl = searchItem!!.url, datetime = searchItem!!.datetime)
+                    ImageData(imageUri = searchItem!!.image_url!!,title = searchItem!!.title,
+                        linkUrl = searchItem!!.url, author = searchItem!!.author!!, datetime = searchItem!!.datetime)
                 }
                 onChoiceListener!!.clickOk(imageData)
             }
@@ -108,6 +113,13 @@ class DialogPopup(context: Context): DialogFragment() {
                 authorPopup.toVisible()
                 authorPopup.text = searchItem!!.author
             }
+        }
+        if (isMypage) {
+            popupIconLin.toGone()
+            choicePopupContent.text = "관련 링크로 이동하시겠습니까?"
+        } else {
+            popupIconLin.toVisible()
+            choicePopupContent.text = "내 보관함에 추가 하시겠습니까?"
         }
     }
 
@@ -135,11 +147,13 @@ class DialogPopup(context: Context): DialogFragment() {
         @JvmStatic
         fun newInstance(
             searchItem: SearchItem,
+            isMyPage: Boolean,
             context: Context
         ) =
             DialogPopup(context).apply {
                 arguments = Bundle().apply {
                     putSerializable(IMAGE_PARAM, searchItem)
+                    putBoolean(MYPAGE_PARAM, isMyPage)
                 }
             }
     }
