@@ -5,6 +5,8 @@ import android.content.Context
 import androidx.room.Room
 import co.kr.imageapp.kakao.data.local.mypage.ImageDao
 import co.kr.imageapp.kakao.data.local.mypage.ImageDataBase
+import co.kr.imageapp.kakao.data.local.search.SearchDao
+import co.kr.imageapp.kakao.data.local.search.SearchDataBase
 import co.kr.imageapp.kakao.util.Network
 import co.kr.imageapp.kakao.util.NetworkConnectivity
 import dagger.Module
@@ -33,6 +35,20 @@ class AppModule {
     fun provideMainDao(dataBase: ImageDataBase): ImageDao {
         return dataBase.imageDao()
     }
+    @Provides
+    @Singleton
+    fun provideSearchDatabase(@ApplicationContext context: Context): SearchDataBase {
+        return Room.databaseBuilder(context, SearchDataBase::class.java, "search_db")
+            .fallbackToDestructiveMigration()
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideSearchDao(dataBase: SearchDataBase): SearchDao {
+        return dataBase.searchDao()
+    }
+
 
     @Provides
     @Singleton

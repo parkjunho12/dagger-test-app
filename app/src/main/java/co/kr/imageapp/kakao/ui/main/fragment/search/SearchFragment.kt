@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import co.kr.imageapp.kakao.const.KeyConst.VIDEO_TYPE
 import co.kr.imageapp.kakao.data.Resource
+import co.kr.imageapp.kakao.data.dto.search.SearchData
 import co.kr.imageapp.kakao.data.dto.search.SearchItem
 import co.kr.imageapp.kakao.data.dto.search.SearchItems
 import co.kr.imageapp.kakao.data.error.DEFAULT_ERROR
@@ -29,6 +30,7 @@ import co.kr.imageapp.kakao.data.error.NO_INTERNET_CONNECTION
 import co.kr.imageapp.kakao.data.error.SEARCH_ERROR
 import co.kr.imageapp.kakao.databinding.SearchFragmentBinding
 import co.kr.imageapp.kakao.ui.main.fragment.search.adapter.SearchAdapter
+import co.kr.imageapp.kakao.ui.main.fragment.search.adapter.SearchKeyAdapter
 import co.kr.imageapp.kakao.util.*
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -42,8 +44,10 @@ class SearchFragment : Fragment(), LifecycleObserver {
     private lateinit var viewModel: SearchViewModel
     private lateinit var searchBinding: SearchFragmentBinding
     private lateinit var searchAdapter: SearchAdapter
+    private lateinit var searchKeyAdapter: SearchKeyAdapter
     private lateinit var gridLayoutManager: GridLayoutManager
     private lateinit var privateSearchItem: ArrayList<SearchItem>
+    private lateinit var linearLayoutManager: LinearLayoutManager
     private var page = 1
     private var queryText = ""
     private var videoLast = false
@@ -58,7 +62,9 @@ class SearchFragment : Fragment(), LifecycleObserver {
         setTextListener()
         setScrollListener()
         gridLayoutManager = GridLayoutManager(requireContext(), 2)
+        linearLayoutManager = LinearLayoutManager(requireContext())
         searchBinding.recyclerviewMain.layoutManager = gridLayoutManager
+        searchBinding.recyclerviewSearch.layoutManager = linearLayoutManager
         privateSearchItem = arrayListOf()
         return searchBinding.root
     }
@@ -70,7 +76,6 @@ class SearchFragment : Fragment(), LifecycleObserver {
 
                 val layoutManager = recyclerviewMain.layoutManager
 
-                // hasNextPage() -> 다음 페이지가 있는 경우
                 if (!circularProgressBar.isVisible) {
                     val lastVisibleItem = (layoutManager as LinearLayoutManager)
                         .findLastCompletelyVisibleItemPosition()
@@ -96,6 +101,7 @@ class SearchFragment : Fragment(), LifecycleObserver {
                         imageLast = false
                         videoLast = false
                         queryImages(query, page++)
+                        viewModel.insertSearchText(query)
                         searchBinding.root.hideKeyboard()
                         true
                     } else {
@@ -116,6 +122,8 @@ class SearchFragment : Fragment(), LifecycleObserver {
     }
 
     private fun queryImages(query: String, page: Int) {
+        searchBinding.recyclerviewSearch.toGone()
+        searchBinding.tvNoKeyData.toGone()
         if (!imageLast) {
             viewModel.getImages(query, page)
         }
@@ -129,11 +137,17 @@ class SearchFragment : Fragment(), LifecycleObserver {
         Log.i("tag", "reached the State.Created")
         viewModel = ViewModelProvider(this).get(SearchViewModel::class.java)
         observeViewModel()
+        getCurrentSearch()
+    }
+
+    private fun getCurrentSearch() {
+        viewModel.getSearchData()
     }
 
     private fun observeViewModel() {
         observe(viewModel.searchListLiveDataPrivate, ::handleImageList)
         observe(viewModel.showToast, ::observeToast)
+        observe(viewModel.searchLiveData, ::handleSearchData)
     }
 
 
@@ -171,6 +185,32 @@ class SearchFragment : Fragment(), LifecycleObserver {
             showDataView(true)
         } else {
             showDataView(false)
+        }
+    }
+
+    private fun handleSearchData(status: Resource<List<SearchData>>) {
+        when (status) {
+            is Resource.Loading -> showLoadingView()
+            is Resource.Success -> status.data?.let {
+                bindSearchKeyData(it)
+            }
+            is Resource.LastSuccess -> status.data?.let {
+                bindSearchKeyData(it)
+            }
+            is Resource.DataError -> {
+                showSearchKey(false)
+            }
+        }
+    }
+
+    private fun bindSearchKeyData(it: List<SearchData>)  = with(searchBinding) {
+        if (!(it.isNullOrEmpty())) {
+            searchKeyAdapter = SearchKeyAdapter(viewModel, it)
+            recyclerviewSearch.adapter = searchKeyAdapter
+            recyclerviewSearch.adapter!!.notifyDataSetChanged()
+            showSearchKey(true)
+        } else {
+            showSearchKey(false)
         }
     }
 
@@ -217,6 +257,11 @@ class SearchFragment : Fragment(), LifecycleObserver {
             }
             else -> ""
         }
+    }
+
+    private fun showSearchKey(show: Boolean) = with(searchBinding) {
+        tvNoKeyData.visibility = if (show) GONE else VISIBLE
+        recyclerviewSearch.visibility = if (show) VISIBLE else GONE
     }
 
     private fun showDataView(show: Boolean) = with(searchBinding) {

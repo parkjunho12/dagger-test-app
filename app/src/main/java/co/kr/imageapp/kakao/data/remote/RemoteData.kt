@@ -7,7 +7,6 @@ import co.kr.imageapp.kakao.data.dto.search.ImageList
 import co.kr.imageapp.kakao.data.dto.search.SearchItem
 import co.kr.imageapp.kakao.data.dto.search.SearchItems
 import co.kr.imageapp.kakao.data.dto.search.VideoList
-import co.kr.imageapp.kakao.data.error.LAST_PAGE
 import co.kr.imageapp.kakao.data.error.NETWORK_ERROR
 import co.kr.imageapp.kakao.data.error.NO_INTERNET_CONNECTION
 import co.kr.imageapp.kakao.data.error.SEARCH_ERROR

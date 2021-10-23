@@ -15,4 +15,5 @@ abstract class DataModule {
     @Binds
     @Singleton
     abstract fun provideDataRepository(dataRepository: DataRepository): DataRepositorySource
+
 }

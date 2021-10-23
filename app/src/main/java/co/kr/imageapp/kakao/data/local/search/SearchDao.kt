@@ -10,14 +10,14 @@ import co.kr.imageapp.kakao.data.dto.search.SearchData
 interface SearchDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertAll(vararg search: SearchDao)
+    fun insertAll(vararg search: SearchData)
 
     @Query("SELECT * FROM Search")
     fun getAll(): List<SearchData>
 
     @Update
-    fun update(image: SearchData)
+    fun update(searhData: SearchData)
 
-    @Delete
-    fun delete(image: SearchData)
+    @Query("DELETE FROM Search WHERE searchKey = :searchKey")
+    fun delete(searchKey: String)
 }
