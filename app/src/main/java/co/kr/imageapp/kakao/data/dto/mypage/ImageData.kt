@@ -7,9 +7,11 @@ import java.io.Serializable
 
 @Entity(tableName = "Images")
 data class ImageData(
-    @PrimaryKey(autoGenerate = true) val index: Int = 0,
-    @ColumnInfo val imageUri: String,
+    @PrimaryKey
+    @ColumnInfo
+    val imageUri: String,
     @ColumnInfo val title: String,
     @ColumnInfo val linkUrl: String,
+    @ColumnInfo val playTime: Int = 0,
     @ColumnInfo val datetime: String
 ) : Serializable

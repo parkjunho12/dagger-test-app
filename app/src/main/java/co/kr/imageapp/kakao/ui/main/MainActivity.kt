@@ -14,7 +14,6 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : BaseActivity() {
     private lateinit var mainBinding: ActivityMainBinding
-    private val mainViewModel: MainViewModel by viewModels<MainViewModel>()
 
     override fun observeViewModel() {
 
@@ -25,11 +24,14 @@ class MainActivity : BaseActivity() {
         val view = mainBinding.root
         setContentView(view)
         setViewPager()
-
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+    }
+
+    fun selectMyPage() {
+        mainBinding.viewpagerContainer.setCurrentItem(1, true)
     }
 
     private fun setViewPager()= with(mainBinding) {

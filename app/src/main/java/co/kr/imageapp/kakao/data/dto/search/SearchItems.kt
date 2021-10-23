@@ -1,5 +1,7 @@
 package co.kr.imageapp.kakao.data.dto.search
 
+import java.io.Serializable
+
 
 data class SearchItems(val searchItemList: ArrayList<SearchItem>)
 
@@ -14,4 +16,8 @@ data class SearchItem(
     val width: Int = 0,
     val height: Int = 0,
     val searchType: Int
-)
+): Serializable {
+    companion object {
+        val EMPTY_SEARCH_ITEM = SearchItem("", "", "", "", 0, "", "", 0, 0, 0)
+    }
+}

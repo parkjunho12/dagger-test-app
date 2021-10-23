@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import co.kr.imageapp.kakao.const.KeyConst.VIDEO_TYPE
 import co.kr.imageapp.kakao.data.Resource
+import co.kr.imageapp.kakao.data.dto.mypage.ImageData
 import co.kr.imageapp.kakao.data.dto.search.SearchData
 import co.kr.imageapp.kakao.data.dto.search.SearchItem
 import co.kr.imageapp.kakao.data.dto.search.SearchItems
@@ -26,6 +27,8 @@ import co.kr.imageapp.kakao.data.error.NETWORK_ERROR
 import co.kr.imageapp.kakao.data.error.NO_INTERNET_CONNECTION
 import co.kr.imageapp.kakao.data.error.SEARCH_ERROR
 import co.kr.imageapp.kakao.databinding.SearchFragmentBinding
+import co.kr.imageapp.kakao.ui.dialog.DialogPopup
+import co.kr.imageapp.kakao.ui.main.MainActivity
 import co.kr.imageapp.kakao.ui.main.fragment.search.adapter.SearchAdapter
 import co.kr.imageapp.kakao.ui.main.fragment.search.adapter.SearchKeyAdapter
 import co.kr.imageapp.kakao.util.*
@@ -33,7 +36,7 @@ import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class SearchFragment : Fragment(), LifecycleObserver {
+class SearchFragment : Fragment(), LifecycleObserver, DialogPopup.OnChoiceListener {
 
     companion object {
         fun newInstance() = SearchFragment()
@@ -61,7 +64,9 @@ class SearchFragment : Fragment(), LifecycleObserver {
         gridLayoutManager = GridLayoutManager(requireContext(), 2)
         linearLayoutManager = LinearLayoutManager(requireContext())
         searchBinding.recyclerviewMain.layoutManager = gridLayoutManager
+        searchBinding.recyclerviewMain.setHasFixedSize(true)
         searchBinding.recyclerviewSearch.layoutManager = linearLayoutManager
+        searchBinding.recyclerviewSearch.setHasFixedSize(true)
         privateSearchItem = arrayListOf()
         viewModel = ViewModelProvider(this).get(SearchViewModel::class.java)
         observeViewModel()
@@ -152,6 +157,11 @@ class SearchFragment : Fragment(), LifecycleObserver {
         viewModel.getSearchData()
     }
 
+    private fun insertImageToMyPage(imageData: ImageData) {
+        viewModel.insertImageToMyPage(imageData = imageData)
+        (requireActivity() as MainActivity).selectMyPage()
+    }
+
     private fun observeViewModel() {
         observe(viewModel.searchListLiveData, ::handleImageList)
         observeToast(viewModel.showToast)
@@ -162,7 +172,11 @@ class SearchFragment : Fragment(), LifecycleObserver {
 
     private fun popupItemDetail(clickEvent: SingleEvent<SearchItem>) {
         clickEvent.getContentIfNotHandled()?.let {
-
+            val searchItem = clickEvent.peekContent()
+            val popupSearchClick = DialogPopup.newInstance(searchItem, requireContext())
+            popupSearchClick.addChoiceListener(this)
+            parentFragmentManager.beginTransaction().add(popupSearchClick, "DialogFragmnet Tag")
+                .commitAllowingStateLoss()
         }
     }
 
@@ -281,6 +295,7 @@ class SearchFragment : Fragment(), LifecycleObserver {
         tvNoData.toGone()
         recyclerviewSearch.toVisible()
         recyclerviewMain.toGone()
+        upWardBtn.toGone()
     }
 
     private fun returnErrorCode(errorCode: Int?): String {
@@ -310,6 +325,7 @@ class SearchFragment : Fragment(), LifecycleObserver {
     private fun showDataView(show: Boolean) = with(searchBinding) {
         tvNoData.visibility = if (show) GONE else VISIBLE
         recyclerviewMain.visibility = if (show) VISIBLE else GONE
+        upWardBtn.visibility = if (show) VISIBLE else GONE
         circularProgressBar.toGone()
     }
 
@@ -321,6 +337,14 @@ class SearchFragment : Fragment(), LifecycleObserver {
     override fun onDetach() {
         super.onDetach()
         lifecycle.removeObserver(this)
+    }
+
+    override fun clickCancel() {
+
+    }
+
+    override fun clickOk(imageData: ImageData) {
+        insertImageToMyPage(imageData)
     }
 
 

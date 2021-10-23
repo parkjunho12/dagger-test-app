@@ -36,6 +36,7 @@ class SearchViewHolder(private val itemBinding: CardviewItemImageBinding): Recyc
             }
             itemBinding.videoTime.toGone()
         }
+        itemBinding.deleteBtn.toGone()
         itemBinding.imgTitle.text = if (searchItem.title.length >= 18) {
             "${searchItem.title.substring(0, 18)}..."
         } else {

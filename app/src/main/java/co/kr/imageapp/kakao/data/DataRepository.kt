@@ -1,5 +1,6 @@
 package co.kr.imageapp.kakao.data
 
+import co.kr.imageapp.kakao.data.dto.mypage.ImageData
 import co.kr.imageapp.kakao.data.dto.search.SearchData
 import co.kr.imageapp.kakao.data.dto.search.SearchItems
 import co.kr.imageapp.kakao.data.local.LocalData
@@ -41,6 +42,18 @@ class DataRepository @Inject constructor(private val remoteRepository: RemoteDat
     override fun deleteSearchData(searchKey: String): Flow<Resource<Boolean>> {
         return flow {
             emit(localData.deleteSearchData(searchKey))
+        }.flowOn(ioDispatcher)
+    }
+
+    override fun insertImageToMyPage(imageData: ImageData): Flow<Resource<Boolean>> {
+        return flow {
+            emit(localData.insertImageToMyPage(imageData))
+        }.flowOn(ioDispatcher)
+    }
+
+    override fun selectImageToMyPage(): Flow<Resource<List<ImageData>>> {
+        return flow {
+            emit(localData.selectImageToMyPage())
         }.flowOn(ioDispatcher)
     }
 }

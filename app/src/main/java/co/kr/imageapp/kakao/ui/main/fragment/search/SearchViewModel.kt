@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.kr.imageapp.kakao.data.DataRepositorySource
 import co.kr.imageapp.kakao.data.Resource
+import co.kr.imageapp.kakao.data.dto.mypage.ImageData
 import co.kr.imageapp.kakao.data.dto.search.SearchData
 import co.kr.imageapp.kakao.data.dto.search.SearchItem
 import co.kr.imageapp.kakao.data.dto.search.SearchItems
@@ -66,7 +67,9 @@ constructor(private val dataRepositoryRepository: DataRepositorySource) : ViewMo
     }
 
     fun insertSearchText(query: String) {
-        dataRepositoryRepository.requestInsertQuery(query)
+        viewModelScope.launch {
+            dataRepositoryRepository.requestInsertQuery(query).collect()
+        }
     }
 
     fun getSearchData() {
@@ -84,6 +87,12 @@ constructor(private val dataRepositoryRepository: DataRepositorySource) : ViewMo
             dataRepositoryRepository.deleteSearchData(searchKey).collect {
                 deleteQueryPrivate.value = it
             }
+        }
+    }
+
+    fun insertImageToMyPage(imageData: ImageData) {
+        viewModelScope.launch {
+           dataRepositoryRepository.insertImageToMyPage(imageData).collect()
         }
     }
 

@@ -3,11 +3,69 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.main.fragment.mypage.MyPageFragment">
-
-    <TextView
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Hello" />
+        android:layout_height="match_parent">
+        <TextView
+            android:id="@+id/myPageTitle"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:text="내 보관함"
+            android:textSize="20sp"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <LinearLayout
+            android:id="@+id/recyclerLin"
+            android:layout_margin="6dp"
+            android:orientation="vertical"
+            app:layout_constraintTop_toBottomOf="@+id/myPageTitle"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_width="match_parent"
+            android:layout_height="0dp">
 
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerviewMyPage"
+                app:layout_constraintTop_toTopOf="parent"
+                android:background="@color/white"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
+            <com.mikhaellopez.circularprogressbar.CircularProgressBar
+                android:id="@+id/cicleProgressMyPage"
+                android:visibility="gone"
+                app:layout_constraintTop_toBottomOf="@id/recyclerviewMyPage"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center"
+                android:layout_marginBottom="5dp"
+                app:cpb_background_progressbar_color="@android:color/transparent"
+                app:cpb_background_progressbar_width="5dp"
+                app:cpb_progress_direction="to_right"
+                app:cpb_progressbar_color="@color/purple_200"
+                app:cpb_progressbar_width="5dp"
+                app:cpb_indeterminate_mode="true"
+                app:cpb_round_border="false" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvNoDataMyPage"
+            android:text="보관 중인 이미지가 없습니다."
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>
