@@ -6,6 +6,7 @@ import androidx.viewpager2.widget.ViewPager2
 import co.kr.imageapp.kakao.databinding.ActivityMainBinding
 import co.kr.imageapp.kakao.ui.base.BaseActivity
 import co.kr.imageapp.kakao.ui.main.adapter.MainFragmentAdapter
+import co.kr.imageapp.kakao.ui.main.fragment.mypage.MyPageFragment
 import co.kr.imageapp.kakao.ui.main.fragment.search.SearchFragment
 import com.google.android.material.tabs.TabLayoutMediator
 import dagger.hilt.android.AndroidEntryPoint
@@ -29,16 +30,15 @@ class MainActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mainViewModel.imageListLiveData
     }
 
     private fun setViewPager()= with(mainBinding) {
         val searchFragment = SearchFragment.newInstance()
-        val searchFragment2 = SearchFragment.newInstance()
-        val tabTitles = arrayOf("검색", "검색2")
+        val mypageFragment = MyPageFragment.newInstance()
+        val tabTitles = arrayOf("검색", "내 보관함")
         val adapter = MainFragmentAdapter(this@MainActivity)
         adapter.addFrag(searchFragment)
-        adapter.addFrag(searchFragment2)
+        adapter.addFrag(mypageFragment)
         viewpagerContainer.adapter = adapter
         viewpagerContainer.offscreenPageLimit = 3
         viewpagerContainer.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {

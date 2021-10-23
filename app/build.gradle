@@ -1,6 +1,10 @@
 plugins {
     id 'com.android.application'
-    id 'org.jetbrains.kotlin.android'
+    id 'kotlin-android'
+    id 'kotlin-android-extensions'
+    id 'kotlin-kapt'
+    id 'kotlin-platform-android'
+    id 'dagger.hilt.android.plugin'
 }
 
 android {
@@ -82,10 +86,20 @@ dependencies {
     }
 
     // Hilt2.31.2-alpha
-    implementation "com.google.dagger:hilt-android:2.31.2-alpha"
-    implementation "androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha03"
-    androidTestImplementation "com.google.dagger:hilt-android-testing:2.31.2-alpha"
+    implementation "com.google.dagger:hilt-android:$hilt_version"
+    implementation "androidx.hilt:hilt-lifecycle-viewmodel:$hilt_viewmodels"
+    kapt "com.google.dagger:hilt-compiler:$hilt_version"
+    androidTestImplementation "com.google.dagger:hilt-android-testing:$hilt_version"
+    kaptAndroidTest "com.google.dagger:hilt-android-compiler:$hilt_version"
 
+    implementation "com.squareup.picasso:picasso:$picassoVersion"
     implementation "androidx.activity:activity-ktx:1.4.0-rc01"
 
+    //progressBar
+    implementation 'com.mikhaellopez:circularprogressbar:3.0.3'
+
+
+}
+kapt {
+    correctErrorTypes true
 }

@@ -3,11 +3,75 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.main.fragment.search.SearchFragment">
-
-    <TextView
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/main_conlayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Hello" />
+        android:layout_height="match_parent">
+        <LinearLayout
+            app:layout_constraintTop_toTopOf="parent"
+            android:background="@color/purple_200"
+            android:gravity="center"
+            android:id="@+id/search_lin"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize">
+        <androidx.appcompat.widget.SearchView
+            android:background="@drawable/search_round"
+            app:queryHint="검색"
+            android:id="@+id/search_bar"
+            app:defaultQueryHint="검색"
+            app:iconifiedByDefault="false"
+            android:layout_width="351dp"
+            android:layout_height="36dp"/>
+        </LinearLayout>
 
+        <LinearLayout
+            android:id="@+id/recycler_conlayout"
+            android:layout_margin="6dp"
+            android:orientation="vertical"
+            app:layout_constraintTop_toBottomOf="@id/search_lin"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_width="match_parent"
+            android:layout_height="0dp">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerview_main"
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
+            <com.mikhaellopez.circularprogressbar.CircularProgressBar
+                android:id="@+id/circularProgressBar"
+                android:visibility="gone"
+                app:layout_constraintTop_toBottomOf="@id/recyclerview_main"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center"
+                android:layout_marginBottom="5dp"
+                app:cpb_background_progressbar_color="@android:color/transparent"
+                app:cpb_background_progressbar_width="5dp"
+                app:cpb_progress_direction="to_right"
+                app:cpb_progressbar_color="@color/purple_200"
+                app:cpb_progressbar_width="5dp"
+                app:cpb_indeterminate_mode="true"
+                app:cpb_round_border="false" />
+        </LinearLayout>
+        <TextView
+            android:id="@+id/tvNoData"
+            android:text="검색 결과가 없습니다."
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>

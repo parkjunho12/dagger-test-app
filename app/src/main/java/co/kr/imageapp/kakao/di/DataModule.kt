@@ -4,6 +4,7 @@ import co.kr.imageapp.kakao.data.DataRepository
 import co.kr.imageapp.kakao.data.DataRepositorySource
 import dagger.Binds
 import dagger.Module
+import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
