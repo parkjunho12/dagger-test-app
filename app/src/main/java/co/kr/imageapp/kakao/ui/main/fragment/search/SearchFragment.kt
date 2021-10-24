@@ -16,6 +16,7 @@ import androidx.lifecycle.*
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import co.kr.imageapp.kakao.const.KeyConst.VIDEO_TYPE
 import co.kr.imageapp.kakao.data.Resource
 import co.kr.imageapp.kakao.data.dto.mypage.ImageData
@@ -46,7 +47,7 @@ class SearchFragment : Fragment(), LifecycleObserver, DialogPopup.OnChoiceListen
     private lateinit var searchBinding: SearchFragmentBinding
     private lateinit var searchAdapter: SearchAdapter
     private lateinit var searchKeyAdapter: SearchKeyAdapter
-    private lateinit var gridLayoutManager: GridLayoutManager
+    private lateinit var gridLayoutManager: StaggeredGridLayoutManager
     private lateinit var privateSearchItem: ArrayList<SearchItem>
     private lateinit var linearLayoutManager: LinearLayoutManager
     private var queryText = ""
@@ -61,7 +62,7 @@ class SearchFragment : Fragment(), LifecycleObserver, DialogPopup.OnChoiceListen
         searchBinding = SearchFragmentBinding.inflate(layoutInflater)
         setTextListener()
         setScrollListener()
-        gridLayoutManager = GridLayoutManager(requireContext(), 2)
+        gridLayoutManager = StaggeredGridLayoutManager(2, LinearLayoutManager.VERTICAL)
         linearLayoutManager = LinearLayoutManager(requireContext())
         searchBinding.recyclerviewMain.layoutManager = gridLayoutManager
         searchBinding.recyclerviewSearch.layoutManager = linearLayoutManager
@@ -78,22 +79,46 @@ class SearchFragment : Fragment(), LifecycleObserver, DialogPopup.OnChoiceListen
         return searchBinding.root
     }
 
+    private fun getLastVisibleItem(lastVisibleItemPositions: IntArray): Int {
+        var maxSize = 0
+        for (i in lastVisibleItemPositions.indices) {
+            if (i == 0) {
+                maxSize = lastVisibleItemPositions[i]
+            } else if (lastVisibleItemPositions[i] > maxSize) {
+                maxSize = lastVisibleItemPositions[i]
+            }
+        }
+        return maxSize
+    }
+
     private fun setScrollListener() = with(searchBinding){
         recyclerviewMain.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            private val visibleThreshold = 5
+            private var previousTotalItemCount = 0
+            private var currentPage = 0
+            private var startingPageIndex = 0
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-
+                var lastVisibleItemPosition = 0
                 val layoutManager = recyclerviewMain.layoutManager
+                val totalItemCount = layoutManager!!.itemCount
 
-                if (!circularProgressBar.isVisible) {
-                    val lastVisibleItem = (layoutManager as LinearLayoutManager)
-                        .findLastCompletelyVisibleItemPosition()
 
-                    // 마지막으로 보여진 아이템 position 이
-                    // 전체 아이템 개수보다 5개 모자란 경우, 데이터를 loadMore 한다
-                    if (layoutManager.itemCount <= lastVisibleItem + 5 && lastVisibleItem != -1) {
-                        queryImages(viewModel.queryText)
-                    }
+                val lastVisibleItems = (layoutManager as StaggeredGridLayoutManager)
+                    .findLastCompletelyVisibleItemPositions(null)
+                lastVisibleItemPosition = getLastVisibleItem(lastVisibleItems)
+
+                if (totalItemCount < previousTotalItemCount) {
+                    this.currentPage = this.startingPageIndex
+                    this.previousTotalItemCount = totalItemCount
+                }
+
+                if (circularProgressBar.isVisible && (totalItemCount > previousTotalItemCount)) {
+                    previousTotalItemCount = totalItemCount
+                }
+
+                if (!circularProgressBar.isVisible && (lastVisibleItemPosition + visibleThreshold) > totalItemCount) {
+                    queryImages(viewModel.queryText)
                 }
             }
         })
@@ -286,6 +311,7 @@ class SearchFragment : Fragment(), LifecycleObserver, DialogPopup.OnChoiceListen
         circularProgressBar.toVisible()
         tvNoData.toGone()
         recyclerviewSearch.toGone()
+        searchHistoryTv.toGone()
         tvNoKeyData.toGone()
     }
 
@@ -293,6 +319,7 @@ class SearchFragment : Fragment(), LifecycleObserver, DialogPopup.OnChoiceListen
         circularProgressBar.toVisible()
         tvNoData.toGone()
         recyclerviewSearch.toVisible()
+        searchHistoryTv.toVisible()
         recyclerviewMain.toGone()
         upWardBtn.toGone()
     }
@@ -318,6 +345,7 @@ class SearchFragment : Fragment(), LifecycleObserver, DialogPopup.OnChoiceListen
     private fun showSearchKey(show: Boolean) = with(searchBinding) {
         tvNoKeyData.visibility = if (show) GONE else VISIBLE
         recyclerviewSearch.visibility = if (show) VISIBLE else GONE
+        searchHistoryTv.toVisible()
         circularProgressBar.toGone()
     }
 

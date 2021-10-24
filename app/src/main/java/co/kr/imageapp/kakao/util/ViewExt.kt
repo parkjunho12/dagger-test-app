@@ -19,20 +19,13 @@ fun ImageView.loadVideo(url: String) {
 }
 
 fun ImageView.loadImage(url: String, width: Int, height: Int) {
-    if (width < 500 || height > 500) {
-        if (width > 500 && height > 500) {
-            this.layoutParams = ViewGroup.LayoutParams(500, 600)
-        } else {
-            if (height > 500) {
-                this.layoutParams = ViewGroup.LayoutParams(500, 500)
-            } else {
-                this.layoutParams = ViewGroup.LayoutParams(500, 350)
-            }
-        }
+    if (width < 500) {
+        this.layoutParams = ViewGroup.LayoutParams(500, 600)
+        Picasso.get().load(url).resize(500, 600).placeholder(R.drawable.no_image).error(R.drawable.no_image).into(this)
     } else {
         this.layoutParams = ViewGroup.LayoutParams(width, height)
+        Picasso.get().load(url).resize(width, height).placeholder(R.drawable.no_image).error(R.drawable.no_image).into(this)
     }
-    Picasso.get().load(url).placeholder(R.drawable.no_image).error(R.drawable.no_image).into(this)
 }
 
 fun View.showKeyboard() {
