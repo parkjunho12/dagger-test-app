@@ -16,7 +16,12 @@ import co.kr.imageapp.kakao.util.toVisible
 class MyPageViewHolder (private val itemBinding: CardviewItemImageBinding): RecyclerView.ViewHolder(itemBinding.root) {
 
     fun bind(imageData: ImageData, recyclerItemListener: MyPageRecyclerItemListener) {
-        itemBinding.img.loadVideo(imageData.imageUri)
+        if (imageData.playTime == 0) {
+            itemBinding.img.loadImage(imageData.imageUri, imageData.width, imageData.height)
+        } else {
+            itemBinding.img.layoutParams = ViewGroup.LayoutParams(500, 350)
+            itemBinding.img.loadVideo(imageData.imageUri)
+        }
         itemBinding.imgTitle.text = imageData.title
         itemBinding.deleteBtn.toVisible()
         itemBinding.imgDateTime.text = imageData.datetime.split("T")[0]

@@ -18,6 +18,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/imagePopup"
             tools:text = "타이틀"
             android:textColor="@color/black"
             android:gravity="center"
@@ -25,20 +26,18 @@
             android:layout_marginEnd="15dp"
             android:textSize="22dp"
             android:textStyle="bold"
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="10dp"
             android:layout_width="0dp"
             android:layout_height="wrap_content"/>
         <ImageView
             android:id="@+id/imagePopup"
             android:layout_marginTop="20dp"
             android:src="@drawable/no_image"
-            android:background="@drawable/elevation_background"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:scaleType="fitXY"
             app:layout_constraintTop_toBottomOf="@id/choice_popup_title"
-            android:layout_width="250dp"
-            android:layout_height="200dp"/>
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
 
         <TextView
             android:id="@+id/videoTimePopup"

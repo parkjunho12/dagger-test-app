@@ -11,8 +11,12 @@ import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.lifecycle.*
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import co.kr.imageapp.kakao.R
 import co.kr.imageapp.kakao.const.KeyConst.IMAGE_TYPE
 import co.kr.imageapp.kakao.data.Resource
@@ -32,6 +36,7 @@ import co.kr.imageapp.kakao.util.*
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.my_page_fragment.*
+import okhttp3.internal.notifyAll
 
 
 @AndroidEntryPoint
@@ -43,24 +48,74 @@ class MyPageFragment : Fragment(), LifecycleObserver, DialogPopup.OnChoiceListen
 
     private lateinit var viewModel: MyPageViewModel
     private lateinit var myPageBinding: MyPageFragmentBinding
-    private lateinit var gridLayoutManager: GridLayoutManager
+    private lateinit var gridLayoutManager: StaggeredGridLayoutManager
     private lateinit var myPageAdapter: MyPageAdapter
+    private var myPageList: List<ImageData>? = null
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         myPageBinding = MyPageFragmentBinding.inflate(layoutInflater)
-        gridLayoutManager = GridLayoutManager(requireContext(), 2)
-        myPageBinding.recyclerviewMyPage.layoutManager = gridLayoutManager
-        myPageBinding.recyclerviewMyPage.setHasFixedSize(true)
         viewModel = ViewModelProvider(this).get(MyPageViewModel::class.java)
         observeViewModel()
+        setScrollListener()
         return myPageBinding.root
+    }
+
+    private fun getLastVisibleItem(lastVisibleItemPositions: IntArray): Int {
+        var maxSize = 0
+        for (i in lastVisibleItemPositions.indices) {
+            if (i == 0) {
+                maxSize = lastVisibleItemPositions[i]
+            } else if (lastVisibleItemPositions[i] > maxSize) {
+                maxSize = lastVisibleItemPositions[i]
+            }
+        }
+        return maxSize
+    }
+
+    private fun setScrollListener() = with(myPageBinding){
+        recyclerviewMyPage.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            private val visibleThreshold = 5
+            private var previousTotalItemCount = 0
+            private var currentPage = 0
+            private var startingPageIndex = 0
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                var lastVisibleItemPosition = 0
+                val layoutManager = recyclerviewMyPage.layoutManager
+                val totalItemCount = layoutManager!!.itemCount
+
+
+
+                val lastVisibleItems = (layoutManager as StaggeredGridLayoutManager)
+                    .findLastCompletelyVisibleItemPositions(null)
+                lastVisibleItemPosition = getLastVisibleItem(lastVisibleItems)
+
+                if (totalItemCount < previousTotalItemCount) {
+                    this.currentPage = this.startingPageIndex
+                    this.previousTotalItemCount = totalItemCount
+                }
+                if (myPageList != null && lastVisibleItemPosition > -1 && lastVisibleItemPosition < myPageList!!.size) {
+                    myPageTitle.text = myPageList!![lastVisibleItemPosition].regDT.split(",")[0]
+                }
+                if (cicleProgressMyPage.isVisible && (totalItemCount > previousTotalItemCount)) {
+                    previousTotalItemCount = totalItemCount
+                }
+
+                if (!cicleProgressMyPage.isVisible && (lastVisibleItemPosition + visibleThreshold) > totalItemCount) {
+                    // 끝에 도착했을때 작업
+                }
+            }
+        })
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
     fun onCreated(){
         Log.i("tag","reached the State.Created")
+        gridLayoutManager = StaggeredGridLayoutManager(2, LinearLayoutManager.VERTICAL)
+        myPageBinding.recyclerviewMyPage.layoutManager = gridLayoutManager
+        myPageBinding.recyclerviewMyPage.setHasFixedSize(true)
         viewModel.getMyImages()
     }
 
@@ -89,8 +144,10 @@ class MyPageFragment : Fragment(), LifecycleObserver, DialogPopup.OnChoiceListen
 
     private fun bindImageListData(imageList: List<ImageData>) = with(myPageBinding) {
         if (!(imageList.isNullOrEmpty())) {
-            myPageAdapter = MyPageAdapter(viewModel, imageList)
+            val myPageAdapter = MyPageAdapter(viewModel, imageList)
+            myPageList = imageList
             recyclerviewMyPage.adapter = myPageAdapter
+            recyclerviewMyPage.scrollToPosition(imageList.lastIndex)
             showDataView(true)
         } else {
             showDataView(false)

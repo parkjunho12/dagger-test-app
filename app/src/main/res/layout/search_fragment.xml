@@ -65,7 +65,7 @@
             android:id="@+id/searchHistoryTv"
             android:text="검색 기록"
             android:paddingTop="6dp"
-            android:paddingStart="30dp"
+            android:paddingStart="15dp"
             android:textSize="18sp"
             android:textColor="@color/black"
             android:textStyle="bold"

@@ -14,10 +14,9 @@ import co.kr.imageapp.kakao.const.KeyConst.VIDEO_TYPE
 import co.kr.imageapp.kakao.data.dto.mypage.ImageData
 import co.kr.imageapp.kakao.data.dto.search.SearchItem
 import co.kr.imageapp.kakao.databinding.DialogChoicePopupBinding
-import co.kr.imageapp.kakao.util.loadImage
-import co.kr.imageapp.kakao.util.loadVideo
-import co.kr.imageapp.kakao.util.toGone
-import co.kr.imageapp.kakao.util.toVisible
+import co.kr.imageapp.kakao.util.*
+import java.text.SimpleDateFormat
+import java.util.*
 
 
 private const val IMAGE_PARAM = "image_param"
@@ -86,12 +85,18 @@ class DialogPopup(context: Context): DialogFragment() {
         }
         popupOkBtn.setOnClickListener {
             if (searchItem != null) {
+                val now = System.currentTimeMillis()
+                val date = Date(now)
+                val sdf = SimpleDateFormat("yyyy년 MM월 dd일,hh:mm:ss")
+                val regDT =
+//                    "2021년 10월 21일,22:12:23"
+                    sdf.format(date)
                 val imageData = if (searchItem!!.searchType == VIDEO_TYPE) {
                     ImageData(imageUri = searchItem!!.thumbnail_url,title = searchItem!!.title, linkUrl = searchItem!!.url,
-                        playTime = searchItem!!.play_time!!, author = searchItem!!.author!!, datetime = searchItem!!.datetime)
+                        playTime = searchItem!!.play_time!!, author = searchItem!!.author!!, datetime = searchItem!!.datetime, regDT = regDT)
                 } else {
-                    ImageData(imageUri = searchItem!!.image_url!!,title = searchItem!!.title,
-                        linkUrl = searchItem!!.url, author = searchItem!!.author!!, datetime = searchItem!!.datetime)
+                    ImageData(imageUri = searchItem!!.image_url!!,title = searchItem!!.title, width = searchItem!!.width, height = searchItem!!.height,
+                        linkUrl = searchItem!!.url, author = searchItem!!.author!!, datetime = searchItem!!.datetime, regDT = regDT)
                 }
                 onChoiceListener!!.clickOk(imageData)
             }
@@ -136,7 +141,7 @@ class DialogPopup(context: Context): DialogFragment() {
                 videoTimePopup.text = "${(searchItem!!.play_time!!.toInt() /60)}:$secStr"
                 videoTimePopup.toVisible()
             } else {
-                imagePopup.loadVideo(searchItem!!.image_url!!)
+                imagePopup.loadPopup(searchItem!!.image_url!!, searchItem!!.width, searchItem!!.height)
                 videoTimePopup.toGone()
             }
         }

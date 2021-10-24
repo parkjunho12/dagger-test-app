@@ -70,8 +70,7 @@ class SearchFragment : Fragment(), LifecycleObserver, DialogPopup.OnChoiceListen
         privateSearchItem = arrayListOf()
         viewModel = ViewModelProvider(this).get(SearchViewModel::class.java)
         observeViewModel()
-        searchAdapter = SearchAdapter(viewModel, privateSearchItem)
-        searchBinding.recyclerviewMain.adapter = searchAdapter
+
         searchBinding.upWardBtn.setOnClickListener {
             searchBinding.recyclerviewMain.scrollToPosition(0)
         }
@@ -174,6 +173,14 @@ class SearchFragment : Fragment(), LifecycleObserver, DialogPopup.OnChoiceListen
         Log.i("tag", "reached the State.Created")
         getCurrentSearch()
         refreshStatus()
+        gridLayoutManager = StaggeredGridLayoutManager(2, LinearLayoutManager.VERTICAL)
+        linearLayoutManager = LinearLayoutManager(requireContext())
+        searchBinding.recyclerviewMain.layoutManager = gridLayoutManager
+        searchBinding.recyclerviewSearch.layoutManager = linearLayoutManager
+        searchBinding.recyclerviewSearch.setHasFixedSize(true)
+        privateSearchItem = arrayListOf()
+        searchAdapter = SearchAdapter(viewModel, privateSearchItem)
+        searchBinding.recyclerviewMain.adapter = searchAdapter
         searchBinding.searchBar.setQuery("", false)
     }
 
@@ -183,7 +190,7 @@ class SearchFragment : Fragment(), LifecycleObserver, DialogPopup.OnChoiceListen
 
     private fun insertImageToMyPage(imageData: ImageData) {
         viewModel.insertImageToMyPage(imageData = imageData)
-        (requireActivity() as MainActivity).selectMyPage()
+        Toast.makeText(requireContext(), "${imageData.title} 내 보관함에 추가 되었습니다.", Toast.LENGTH_SHORT).show()
     }
 
     private fun observeViewModel() {

@@ -11,20 +11,64 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import co.kr.imageapp.kakao.R
+import co.kr.imageapp.kakao.const.KeyConst.VIDEO_TYPE
 import com.squareup.picasso.Picasso
 
 fun ImageView.loadImage(@DrawableRes resId: Int) = Picasso.get().load(resId).into(this)
 fun ImageView.loadVideo(url: String) {
-    Picasso.get().load(url).placeholder(R.drawable.no_image).error(R.drawable.no_image).into(this)
+    Picasso.get().load(url).resize(500, 350).placeholder(R.drawable.no_image).error(R.drawable.no_image).into(this)
+}
+
+fun ImageView.loadPopup(url: String, width: Int, height: Int) {
+    if (width > height) {
+        Picasso.get().load(url).resize(500, 350).placeholder(R.drawable.no_image).error(R.drawable.no_image).into(this)
+    } else {
+        Picasso.get().load(url).resize(500, 650).placeholder(R.drawable.no_image).error(R.drawable.no_image).into(this)
+    }
 }
 
 fun ImageView.loadImage(url: String, width: Int, height: Int) {
-    if (width < 500) {
-        this.layoutParams = ViewGroup.LayoutParams(500, 600)
-        Picasso.get().load(url).resize(500, 600).placeholder(R.drawable.no_image).error(R.drawable.no_image).into(this)
+    if (width > height) {
+        this.layoutParams = ViewGroup.LayoutParams(500, 350)
+        when {
+            width < 500 -> {
+                Picasso.get().load(url).resize(500, 350).placeholder(R.drawable.no_image).error(R.drawable.no_image).into(this)
+            }
+            width > 500 -> {
+                Picasso.get().load(url).resize(500, 350).placeholder(R.drawable.no_image).error(R.drawable.no_image).into(this)
+            }
+            height < 350 -> {
+                Picasso.get().load(url).resize(500, 350).placeholder(R.drawable.no_image).error(R.drawable.no_image).into(this)
+            }
+            else -> {
+                Picasso.get().load(url).fit().placeholder(R.drawable.no_image).error(R.drawable.no_image).into(this)
+            }
+        }
     } else {
-        this.layoutParams = ViewGroup.LayoutParams(width, height)
-        Picasso.get().load(url).resize(width, height).placeholder(R.drawable.no_image).error(R.drawable.no_image).into(this)
+        this.layoutParams = ViewGroup.LayoutParams(500, 650)
+        when {
+            width < 500 -> {
+                Picasso.get().load(url).resize(500, 650).placeholder(R.drawable.no_image).error(R.drawable.no_image).into(this)
+            }
+            width > 500 -> {
+                if (height > 1000) {
+                    this.layoutParams = ViewGroup.LayoutParams(500, 1000)
+                    Picasso.get().load(url).resize(500, 1000).placeholder(R.drawable.no_image).error(R.drawable.no_image).into(this)
+                } else {
+                    Picasso.get().load(url).resize(500, 650).placeholder(R.drawable.no_image).error(R.drawable.no_image).into(this)
+                }
+            }
+            height < 350 -> {
+                Picasso.get().load(url).resize(500, 650).placeholder(R.drawable.no_image).error(R.drawable.no_image).into(this)
+            }
+            height > 1000 -> {
+                this.layoutParams = ViewGroup.LayoutParams(500, 1000)
+                Picasso.get().load(url).resize(500, 1000).placeholder(R.drawable.no_image).error(R.drawable.no_image).into(this)
+            }
+            else -> {
+                Picasso.get().load(url).fit().placeholder(R.drawable.no_image).error(R.drawable.no_image).into(this)
+            }
+        }
     }
 }
 

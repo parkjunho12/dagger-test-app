@@ -61,7 +61,7 @@ class TestDataRepository @Inject constructor() : DataRepositorySource {
     override fun selectImageToMyPage(): Flow<Resource<List<ImageData>>> {
         return flow { emit(Resource.Success(listOf(ImageData("https://t1.daumcdn.net/news/201808/20/seoul/20180820220101977riwp.jpg",
         title = "뉴스 이미지", linkUrl = "http://v.media.daum.net/v/20180820220101407",
-            author = "서울신문", datetime = "2018-08-20T22:01:01.000+09:00")))) }
+            author = "서울신문", datetime = "2018-08-20T22:01:01.000+09:00", regDT = "2021년 10월 24일")))) }
     }
 
     override fun deleteMyImage(imageData: ImageData): Flow<Resource<Boolean>> {

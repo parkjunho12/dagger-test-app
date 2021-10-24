@@ -11,7 +11,7 @@ interface ImageDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAll(vararg image: ImageData)
 
-    @Query("SELECT * FROM Images")
+    @Query("SELECT * FROM Images ORDER BY regDT ASC")
     fun getAll(): List<ImageData>
 
     @Update

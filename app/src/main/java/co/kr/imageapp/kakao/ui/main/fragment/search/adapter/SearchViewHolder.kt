@@ -39,7 +39,12 @@ class SearchViewHolder(private val itemBinding: CardviewItemImageBinding): Recyc
         } else {
             searchItem.title
         }
-        itemBinding.imgSiteName.text = searchItem.author
+        if (searchItem.author == "") {
+            itemBinding.imgSiteName.toGone()
+        } else {
+            itemBinding.imgSiteName.toVisible()
+            itemBinding.imgSiteName.text = searchItem.author
+        }
         itemBinding.imgDateTime.text = searchItem.datetime.split("T")[0]
         itemBinding.root.setOnClickListener {
             recyclerItemListener.onItemSelected(searchItem)
