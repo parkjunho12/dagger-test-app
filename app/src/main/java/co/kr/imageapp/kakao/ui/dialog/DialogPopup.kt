@@ -52,12 +52,17 @@ class DialogPopup(context: Context): DialogFragment() {
     val mContext = context
     private var isMypage = false
     private lateinit var choiceBinding: DialogChoicePopupBinding
+    private var isShare = false
     val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
-            // Do if the permission is granted
-            shareImages()
+            // Do if the permission is grante
+                if (isShare) {
+                    shareImages()
+                } else {
+                    downLoadImages()
+                }
         }
         else {
             // Do otherwise
@@ -144,6 +149,7 @@ class DialogPopup(context: Context): DialogFragment() {
         if (searchItem != null) {
             downPopupBtn.setOnClickListener {
                 if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    isShare = false
                     permissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 } else {
                     downLoadImages()
@@ -151,6 +157,7 @@ class DialogPopup(context: Context): DialogFragment() {
             }
             sharePopupBtn.setOnClickListener {
                 if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    isShare = true
                     permissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 } else {
                     shareImages()
