@@ -90,7 +90,7 @@ class SearchFragment : Fragment(), LifecycleObserver, DialogPopup.OnChoiceListen
         return maxSize
     }
 
-    private fun setScrollListener() = with(searchBinding){
+    private fun setScrollListener() = with(searchBinding) {
         recyclerviewMain.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             private val visibleThreshold = 5
             private var previousTotalItemCount = 0
@@ -189,7 +189,9 @@ class SearchFragment : Fragment(), LifecycleObserver, DialogPopup.OnChoiceListen
 
     private fun insertImageToMyPage(imageData: ImageData) {
         viewModel.insertImageToMyPage(imageData = imageData)
-        Toast.makeText(requireContext(), "${imageData.title} 내 보관함에 추가 되었습니다.", Toast.LENGTH_SHORT).show()
+        Toast.makeText(requireContext(), "${imageData.title} 내 보관함에 추가 되었습니다.", Toast.LENGTH_SHORT)
+            .show()
+        searchBinding.root.hideKeyboard()
     }
 
     private fun observeViewModel() {
@@ -261,9 +263,9 @@ class SearchFragment : Fragment(), LifecycleObserver, DialogPopup.OnChoiceListen
         when (status) {
             is Resource.Loading -> showKeyLoadingView()
             is Resource.Success -> status.data?.let {
-               if (it) {
-                   getCurrentSearch()
-               }
+                if (it) {
+                    getCurrentSearch()
+                }
             }
             is Resource.LastSuccess -> status.data?.let {
                 if (it) {
@@ -277,7 +279,7 @@ class SearchFragment : Fragment(), LifecycleObserver, DialogPopup.OnChoiceListen
     }
 
 
-    private fun bindSearchKeyData(it: List<SearchData>)  = with(searchBinding) {
+    private fun bindSearchKeyData(it: List<SearchData>) = with(searchBinding) {
         if (!(it.isNullOrEmpty())) {
             searchKeyAdapter = SearchKeyAdapter(viewModel, it)
             recyclerviewSearch.adapter = searchKeyAdapter

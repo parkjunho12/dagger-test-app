@@ -30,10 +30,6 @@ class MainActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
     }
 
-    fun selectMyPage() {
-        mainBinding.viewpagerContainer.setCurrentItem(1, true)
-    }
-
     private fun setViewPager()= with(mainBinding) {
         val searchFragment = SearchFragment.newInstance()
         val mypageFragment = MyPageFragment.newInstance()
