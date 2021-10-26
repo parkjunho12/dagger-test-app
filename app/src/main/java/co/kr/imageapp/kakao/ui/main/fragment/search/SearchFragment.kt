@@ -139,6 +139,7 @@ class SearchFragment : Fragment(), LifecycleObserver, DialogPopup.OnChoiceListen
                         queryText = query
                         queryImages(query)
                         viewModel.insertSearchText(query)
+                        searchBinding.root.hideKeyboard()
                         true
                     } else {
                         Toast.makeText(requireContext(), "두글자 이상 입력해주시기 바랍니다.", Toast.LENGTH_LONG)
