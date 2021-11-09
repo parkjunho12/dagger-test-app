@@ -21,6 +21,9 @@
         android:requestLegacyExternalStorage="true"
         android:theme="@style/Theme.Imageapp"
         tools:targetApi="m">
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3940256099942544~3347511713"/>
         <activity
             android:name=".ui.main.MainActivity"
             android:exported="true">

@@ -115,6 +115,8 @@ dependencies {
     androidTestImplementation "androidx.room:room-testing:$roomVersion"
     implementation "androidx.test.espresso:espresso-idling-resource:$espressoVersion"
 
+    implementation 'com.google.android.gms:play-services-ads:20.4.0'
+
 }
 kapt {
     correctErrorTypes true

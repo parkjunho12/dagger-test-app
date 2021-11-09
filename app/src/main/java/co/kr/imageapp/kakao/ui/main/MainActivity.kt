@@ -8,6 +8,8 @@ import co.kr.imageapp.kakao.ui.base.BaseActivity
 import co.kr.imageapp.kakao.ui.main.adapter.MainFragmentAdapter
 import co.kr.imageapp.kakao.ui.main.fragment.mypage.MyPageFragment
 import co.kr.imageapp.kakao.ui.main.fragment.search.SearchFragment
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.MobileAds
 import com.google.android.material.tabs.TabLayoutMediator
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -28,6 +30,10 @@ class MainActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        MobileAds.initialize(this) {}
+
+        val adRequest = AdRequest.Builder().build()
+        mainBinding.adView.loadAd(adRequest)
     }
 
     private fun setViewPager()= with(mainBinding) {
