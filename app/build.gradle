@@ -18,8 +18,8 @@ android {
         applicationId "co.kr.imageapp.kakao"
         minSdk 21
         targetSdk 31
-        versionCode 1
-        versionName "1.0"
+        versionCode 21111201
+        versionName "21.11.12.01"
 
         testInstrumentationRunner "co.kr.imageapp.kakao.CustomTestRunner"
     }
